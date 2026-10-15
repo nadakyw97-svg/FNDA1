@@ -1,637 +1,851 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POS 일별/상품별 판매 실적 대시보드</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Chart.js for visualizations -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- PapaParse for CSV parsing -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <!-- Google Fonts Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(229, 231, 235, 0.8);
-        }
-        /* Custom scrollbar for tables */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>이마트 센트럴점 | 내 맘대로 골라 담는 간편식 20% 파격 할인</title>
+  <meta name="description" content="이마트 센트럴점 단독! 훈제오리 샐러드랩, 불고기덮밥, 닭갈비볶음밥 중 원하는 2개를 담으면 20% 즉시 할인! 전 조합 9천원대 실현.">
+  <meta name="keywords" content="이마트, 센트럴점, 간편식 할인, 샐러드랩, 소불고기덮밥, 닭갈비볶음밥, 20%할인, 타임어택">
+  <meta property="og:title" content="[이마트 센트럴점] 내 맘대로 골라 담는 간편식 20% 파격 할인!">
+  <meta property="og:description" content="2개 이상 구매 시 20% 즉시 할인! 1끼 4,000원대 실속 간편식 프로모션">
+  <meta property="og:image" content="./포스터.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800;900&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css">
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen">
-    <header class="bg-indigo-900 text-white shadow-lg border-b border-indigo-800 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div class="flex items-center space-x-3">
-                    <div class="p-2 bg-indigo-700/60 rounded-lg border border-indigo-500/30">
-                        <i data-lucide="shopping-bag" class="w-7 h-7 text-indigo-200"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-xl font-bold tracking-tight text-white">POS 일별 / 상품별 판매 대시보드</h1>
-                        <p class="text-xs text-indigo-200 mt-0.5">실시간 매출 분석 및 상품별 트렌드 리포트</p>
-                    </div>
-                </div>
-                
-                <!-- CSV File Upload & Action Controls -->
-                <div class="flex items-center gap-3">
-                    <label class="cursor-pointer inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg shadow-sm transition border border-indigo-400/30">
-                        <i data-lucide="upload" class="w-4 h-4 mr-2"></i>
-                        <span>CSV 파일 업로드</span>
-                        <input type="file" id="csvFileInput" accept=".csv" class="hidden">
-                    </label>
-                    <button id="resetDemoBtn" class="inline-flex items-center px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-medium rounded-lg transition border border-slate-700" title="기본 샘플 데이터로 복원">
-                        <i data-lucide="refresh-cw" class="w-4 h-4 mr-1.5"></i>
-                        <span>샘플 복원</span>
-                    </button>
-                </div>
+<body>
+
+  <!-- 최상단 안내 롤링 티커 -->
+  <aside id="top-ticker" class="top-ticker">
+    <div class="ticker-track">
+      <span>🎉 <strong>이마트 센트럴점 단독 진행!</strong> 간편식 핵심 3종 2개 이상 선택 시 <strong>20% 즉시 할인</strong></span>
+      <span class="ticker-divider">•</span>
+      <span>⏰ <strong>매일 점심 12:00 선착순 타임어택</strong> 한정 수량 오픈!</span>
+      <span class="ticker-divider">•</span>
+      <span>🥗 <strong>1끼 환산가 4,000원대</strong> 실속 건강 한 끼</span>
+      <span class="ticker-divider">•</span>
+      <span>🎉 <strong>이마트 센트럴점 단독 진행!</strong> 간편식 핵심 3종 2개 이상 선택 시 <strong>20% 즉시 할인</strong></span>
+      <span class="ticker-divider">•</span>
+      <span>⏰ <strong>매일 점심 12:00 선착순 타임어택</strong> 한정 수량 오픈!</span>
+    </div>
+  </aside>
+
+  <!-- 메인 네비게이션 헤더 -->
+  <header id="site-header" class="site-header">
+    <div class="header-container">
+      <a href="#hero" class="brand-logo" id="brand-logo">
+        <span class="emart-badge">emart</span>
+        <span class="branch-name">센트럴점</span>
+        <span class="event-tag">SPECIAL EVENT</span>
+      </a>
+      <nav class="nav-menu" id="nav-menu">
+        <a href="#calculator" class="nav-link">골라담기 계산기</a>
+        <a href="#curation" class="nav-link">추천 조합</a>
+        <a href="#card-news" class="nav-link">기획 비하인드</a>
+        <a href="#store-guide" class="nav-link">매장 위치</a>
+        <a href="#faq" class="nav-link">이용안내</a>
+      </nav>
+      <div class="header-actions">
+        <button id="btn-share-header" class="btn-icon" aria-label="프로모션 공유하기" title="공유하기">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="18" cy="5" r="3"></circle>
+            <circle cx="6" cy="12" r="3"></circle>
+            <circle cx="18" cy="19" r="3"></circle>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+          </svg>
+        </button>
+        <a href="#calculator" class="btn-header-cta" id="btn-header-calc">조합 만들기</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- 1. Hero 섹션 -->
+    <section id="hero" class="hero-section">
+      <div class="hero-bg-glow"></div>
+      <div class="section-container hero-grid">
+        
+        <!-- 히어로 좌측 텍스트 & 타임어택 -->
+        <div class="hero-content">
+          <div class="hero-pill-badge">
+            <span class="badge-dot"></span>
+            <span>2026.10.21(수) ~ 11.03(화) · 14일간</span>
+          </div>
+          
+          <h1 class="hero-title">
+            <span class="sub-headline">혼밥족을 위한 자유로운 선택!</span>
+            <span class="main-headline">
+              오늘의 간편식,<br>
+              <span class="highlight-yellow">내 맘대로 골라 담자!</span>
+            </span>
+          </h1>
+
+          <p class="hero-description">
+            강제 묶음은 이제 그만! 원하는 냉장 간편식 <strong>2종을 내 맘대로</strong> 고르면<br>
+            결제 금액 <strong>즉시 20% 할인!</strong> 전 조합 9천원대(1끼 4천원대)로 가볍게 즐기세요.
+          </p>
+
+          <!-- 매일 점심 12:00 타임어택 카운트다운 카드 -->
+          <div class="hero-timer-card" id="time-attack-card">
+            <div class="timer-header">
+              <div class="timer-title">
+                <span class="live-indicator">LIVE</span>
+                <strong>매일 점심 12:00 선착순 타임어택</strong>
+              </div>
+              <span class="timer-status" id="timer-status-text">오늘의 타임어택까지 남은 시간</span>
             </div>
+            
+            <div class="countdown-display" id="countdown-display">
+              <div class="countdown-unit">
+                <span class="time-num" id="cd-hours">00</span>
+                <span class="time-label">HOURS</span>
+              </div>
+              <span class="cd-colon">:</span>
+              <div class="countdown-unit">
+                <span class="time-num" id="cd-minutes">00</span>
+                <span class="time-label">MINS</span>
+              </div>
+              <span class="cd-colon">:</span>
+              <div class="countdown-unit">
+                <span class="time-num" id="cd-seconds">00</span>
+                <span class="time-label">SECS</span>
+              </div>
+            </div>
+
+            <div class="limited-stock-bar">
+              <div class="stock-info">
+                <span>오늘의 한정 수량: <strong>선착순 20세트</strong></span>
+                <span class="stock-rate" id="stock-rate-text">현재 잔여 <strong>7세트</strong> 남음!</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" id="stock-progress-fill" style="width: 65%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 액션 버튼 -->
+          <div class="hero-action-group">
+            <a href="#calculator" class="btn btn-primary" id="btn-hero-calc">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+              </svg>
+              <span>내 맘대로 조합 계산기 🛒</span>
+            </a>
+            <button id="btn-open-poster-modal" class="btn btn-outline">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+              <span>공식 포스터 크게 보기</span>
+            </button>
+          </div>
+
         </div>
-    </header>
 
-    <!-- Main Container -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-
-        <section class="glass-card rounded-2xl p-5 shadow-sm space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-200/80 pb-3">
-                <div class="flex items-center space-x-2">
-                    <i data-lucide="filter" class="w-5 h-5 text-indigo-600"></i>
-                    <h2 class="font-semibold text-slate-700">조회 필터 설정</h2>
-                </div>
-                <span id="dataCountBadge" class="text-xs font-semibold px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-full border border-indigo-100">
-                    데이터 로딩 중...
-                </span>
+        <!-- 히어로 우측 비주얼 배너 -->
+        <div class="hero-visual">
+          <div class="visual-card">
+            <div class="poster-preview-wrapper" id="poster-preview-trigger">
+              <img src="./포스터.png" alt="이마트 센트럴점 간편식 프로모션 공식 포스터" class="hero-poster-img" loading="eager">
+              <div class="poster-overlay-badge">
+                <span class="badge-discount">20% OFF</span>
+                <span class="badge-sub">터치하여 확대</span>
+              </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <!-- Date Selector Filter -->
-                <div>
-                    <label for="dateSelect" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                        조회 일자 (-YYYY-MM-DD)
-                    </label>
-                    <select id="dateSelect" class="w-full bg-white border border-slate-300 text-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition">
-                        <option value="ALL">전체 날짜</option>
-                    </select>
+            <!-- 프로모션 핵심 포인트 3가지 퀵 뱃지 -->
+            <div class="hero-highlights-row">
+              <div class="highlight-item">
+                <span class="hl-icon">🎯</span>
+                <div class="hl-text">
+                  <strong>자유 선택</strong>
+                  <span>원하는 2종 골라담기</span>
                 </div>
-
-                <!-- Store Filter -->
-                <div>
-                    <label for="storeSelect" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                        점포 선택
-                    </label>
-                    <select id="storeSelect" class="w-full bg-white border border-slate-300 text-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition">
-                        <option value="ALL">전체 점포</option>
-                    </select>
+              </div>
+              <div class="highlight-item">
+                <span class="hl-icon">💰</span>
+                <div class="hl-text">
+                  <strong>전 조합 9천원대</strong>
+                  <span>1끼당 4천원대 실현</span>
                 </div>
-
-                <!-- Category Filter -->
-                <div>
-                    <label for="categorySelect" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                        카테고리
-                    </label>
-                    <select id="categorySelect" class="w-full bg-white border border-slate-300 text-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition">
-                        <option value="ALL">전체 카테고리</option>
-                    </select>
+              </div>
+              <div class="highlight-item">
+                <span class="hl-icon">📍</span>
+                <div class="hl-text">
+                  <strong>센트럴점 단독</strong>
+                  <span>냉장 골든존 매대</span>
                 </div>
-
-                <!-- Promotion Filter -->
-                <div>
-                    <label for="promoSelect" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                        행사 적용 여부
-                    </label>
-                    <select id="promoSelect" class="w-full bg-white border border-slate-300 text-slate-700 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition">
-                        <option value="ALL">전체 (행사 / 정상)</option>
-                        <option value="Y">행사 적용 (Y)</option>
-                        <option value="N">정상 판매 (N)</option>
-                    </select>
-                </div>
-
-                <!-- Product Search Filter -->
-                <div>
-                    <label for="searchInput" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                        상품명 / 코드 검색
-                    </label>
-                    <div class="relative">
-                        <input type="text" id="searchInput" placeholder="검색어 입력..." class="w-full bg-white border border-slate-300 text-slate-700 rounded-lg p-2.5 pl-9 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition">
-                        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
-                    </div>
-                </div>
+              </div>
             </div>
-        </section>
+          </div>
+        </div>
 
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <!-- Total Sales Card -->
-            <div class="glass-card rounded-2xl p-5 shadow-sm border-l-4 border-l-indigo-600 flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">총 매출액</p>
-                    <h3 id="statTotalRevenue" class="text-2xl font-extrabold text-slate-800 mt-1">₩0</h3>
-                    <p class="text-xs text-indigo-600 mt-1 flex items-center font-medium">
-                        <i data-lucide="trending-up" class="w-3.5 h-3.5 mr-1"></i> 실적 합계
-                    </p>
-                </div>
-                <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
-                    <i data-lucide="dollar-sign" class="w-6 h-6"></i>
-                </div>
-            </div>
+      </div>
+    </section>
 
-            <!-- Total Quantity Card -->
-            <div class="glass-card rounded-2xl p-5 shadow-sm border-l-4 border-l-blue-600 flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">총 판매수량</p>
-                    <h3 id="statTotalQuantity" class="text-2xl font-extrabold text-slate-800 mt-1">0개</h3>
-                    <p class="text-xs text-blue-600 mt-1 flex items-center font-medium">
-                        <i data-lucide="package" class="w-3.5 h-3.5 mr-1"></i> 누적 판매량
-                    </p>
+    <!-- 2. 인터랙티브 「내 맘대로 골라 담기」 계산기 섹션 -->
+    <section id="calculator" class="calc-section">
+      <div class="section-container">
+        
+        <div class="section-title-wrap">
+          <span class="section-sub-title">INTERACTIVE SIMULATOR</span>
+          <h2 class="section-main-title">내 맘대로 골라 담기 계산기</h2>
+          <p class="section-desc">
+            마음에 드는 간편식을 <strong>2개 이상</strong> 담아보세요! 즉시 20% 할인이 적용되어 최종 결제 금액과 1끼 환산가를 바로 계산해 드립니다.
+          </p>
+        </div>
+
+        <!-- 프리셋 빠른 선택 바 -->
+        <div class="preset-pill-group">
+          <span class="preset-label">인기 조합 바로 담기:</span>
+          <button class="preset-btn" data-preset="balance">🥗+🥩 영양균형 (랩1+덮밥1)</button>
+          <button class="preset-btn" data-preset="value">🥗+🍗 가성비 (랩1+볶음밥1)</button>
+          <button class="preset-btn" data-preset="hearty">🥩+🍗 든든형 (덮밥1+볶음밥1)</button>
+          <button class="preset-btn" data-preset="light">🥗+🥗 가벼운형 (샐러드랩 2개)</button>
+          <button class="preset-btn btn-reset" id="btn-calc-reset" title="선택 초기화">초기화 ↺</button>
+        </div>
+
+        <div class="calc-grid">
+          
+          <!-- 좌측: 상품 3종 선택 카드 목록 -->
+          <div class="products-selection-col">
+            
+            <!-- 상품 1: 한끼 소불고기덮밥 -->
+            <div class="product-card" data-product-id="bulgogi" data-price="5900" id="card-bulgogi">
+              <div class="product-badge-group">
+                <span class="badge-tag">든든한 고기 한 끼</span>
+              </div>
+              <div class="product-img-wrap">
+                <!-- 포스터 내 불고기덮밥 에셋 및 스타일링 -->
+                <div class="product-thumb-visual bulgogi-visual">
+                  <span class="emoji-food">🥩🍚</span>
                 </div>
-                <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
-                    <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+              </div>
+              <div class="product-details">
+                <h3 class="product-name">한끼 소불고기덮밥</h3>
+                <p class="product-summary">특제 양념의 든든한 소불고기와 고슬고슬한 밥의 조화</p>
+                <div class="price-row">
+                  <span class="regular-price-label">정상가</span>
+                  <span class="price-val">5,900원</span>
                 </div>
+              </div>
+              <div class="quantity-control">
+                <button class="qty-btn btn-minus" data-target="bulgogi" aria-label="수량 감소">-</button>
+                <span class="qty-num" id="qty-bulgogi">0</span>
+                <button class="qty-btn btn-plus" data-target="bulgogi" aria-label="수량 증가">+</button>
+              </div>
             </div>
 
-            <!-- Total Discount Card -->
-            <div class="glass-card rounded-2xl p-5 shadow-sm border-l-4 border-l-rose-500 flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">총 할인액</p>
-                    <h3 id="statTotalDiscount" class="text-2xl font-extrabold text-slate-800 mt-1">₩0</h3>
-                    <p class="text-xs text-rose-500 mt-1 flex items-center font-medium">
-                        <i data-lucide="tag" class="w-3.5 h-3.5 mr-1"></i> 행사 할인 프로모션
-                    </p>
+            <!-- 상품 2: 매콤 닭갈비볶음밥 -->
+            <div class="product-card" data-product-id="chicken" data-price="5500" id="card-chicken">
+              <div class="product-badge-group">
+                <span class="badge-tag">매콤달콤 가성비</span>
+              </div>
+              <div class="product-img-wrap">
+                <div class="product-thumb-visual chicken-visual">
+                  <span class="emoji-food">🍗🔥</span>
                 </div>
-                <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center">
-                    <i data-lucide="percent" class="w-6 h-6"></i>
+              </div>
+              <div class="product-details">
+                <h3 class="product-name">매콤 닭갈비볶음밥</h3>
+                <p class="product-summary">중독성 있는 특제 매콤 소스로 볶아낸 가성비 최고의 볶음밥</p>
+                <div class="price-row">
+                  <span class="regular-price-label">정상가</span>
+                  <span class="price-val">5,500원</span>
                 </div>
+              </div>
+              <div class="quantity-control">
+                <button class="qty-btn btn-minus" data-target="chicken" aria-label="수량 감소">-</button>
+                <span class="qty-num" id="qty-chicken">0</span>
+                <button class="qty-btn btn-plus" data-target="chicken" aria-label="수량 증가">+</button>
+              </div>
             </div>
 
-            <!-- Average Transaction/Item Card -->
-            <div class="glass-card rounded-2xl p-5 shadow-sm border-l-4 border-l-emerald-500 flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">평균 단가 (개당)</p>
-                    <h3 id="statAvgPrice" class="text-2xl font-extrabold text-slate-800 mt-1">₩0</h3>
-                    <p class="text-xs text-emerald-600 mt-1 flex items-center font-medium">
-                        <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 mr-1"></i> 평균 단가 수준
-                    </p>
+            <!-- 상품 3: 훈제오리 샐러드랩 -->
+            <div class="product-card" data-product-id="saladwrap" data-price="6200" id="card-saladwrap">
+              <div class="product-badge-group">
+                <span class="badge-tag green">건강·다이어트 추천</span>
+              </div>
+              <div class="product-img-wrap">
+                <div class="product-thumb-visual salad-visual">
+                  <span class="emoji-food">🥗🌯</span>
                 </div>
-                <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center">
-                    <i data-lucide="pie-chart" class="w-6 h-6"></i>
+              </div>
+              <div class="product-details">
+                <h3 class="product-name">훈제오리 샐러드랩</h3>
+                <p class="product-summary">아삭한 신선 야채와 담백한 훈제오리의 산뜻한 밸런스</p>
+                <div class="price-row">
+                  <span class="regular-price-label">정상가</span>
+                  <span class="price-val">6,200원</span>
                 </div>
-            </div>
-        </section>
-
-        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Line Chart: Sales Trend -->
-            <div class="lg:col-span-2 glass-card rounded-2xl p-5 shadow-sm flex flex-col justify-between">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="font-bold text-slate-800 flex items-center gap-2">
-                        <i data-lucide="line-chart" class="w-5 h-5 text-indigo-600"></i>
-                        날짜별 매출 트렌드
-                    </h3>
-                    <span class="text-xs text-slate-500">일자별 매출 추이</span>
-                </div>
-                <div class="relative w-full h-72">
-                    <canvas id="trendChart"></canvas>
-                </div>
+              </div>
+              <div class="quantity-control">
+                <button class="qty-btn btn-minus" data-target="saladwrap" aria-label="수량 감소">-</button>
+                <span class="qty-num" id="qty-saladwrap">0</span>
+                <button class="qty-btn btn-plus" data-target="saladwrap" aria-label="수량 증가">+</button>
+              </div>
             </div>
 
-            <!-- Doughnut Chart: Category Share -->
-            <div class="glass-card rounded-2xl p-5 shadow-sm flex flex-col justify-between">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="font-bold text-slate-800 flex items-center gap-2">
-                        <i data-lucide="pie-chart" class="w-5 h-5 text-indigo-600"></i>
-                        카테고리별 매출 비중
-                    </h3>
-                    <span class="text-xs text-slate-500">점유율</span>
+          </div>
+
+          <!-- 우측: 실시간 계산 영수증 패널 (Receipt Board) -->
+          <div class="receipt-col">
+            <div class="receipt-card" id="receipt-card">
+              
+              <div class="receipt-top-header">
+                <div class="receipt-emart-title">
+                  <strong>EMART CENTRAL</strong>
+                  <span>간편식 프로모션 계산기</span>
                 </div>
-                <div class="relative w-full h-72 flex items-center justify-center">
-                    <canvas id="categoryChart"></canvas>
+                <div class="receipt-seal" id="receipt-seal">
+                  <span>20% DC</span>
                 </div>
+              </div>
+
+              <!-- 2개 조건 달성 프로그레스 바 -->
+              <div class="discount-requirement-box" id="discount-status-box">
+                <div class="req-msg" id="req-msg">
+                  <span class="req-icon">💡</span>
+                  <span id="req-text">원하는 메뉴를 <strong>2개 이상</strong> 골라보세요!</span>
+                </div>
+                <div class="progress-bar-small">
+                  <div class="progress-fill-small" id="items-progress-bar" style="width: 0%;"></div>
+                </div>
+              </div>
+
+              <!-- 담은 품목 목록 리스트 -->
+              <div class="selected-items-list" id="selected-items-list">
+                <div class="empty-list-placeholder">
+                  <span>🛒 담긴 상품이 없습니다.<br>원하는 메뉴의 <strong>[+]</strong> 버튼을 눌러주세요.</span>
+                </div>
+              </div>
+
+              <div class="receipt-divider-dashed"></div>
+
+              <!-- 계산 결과 요약 행 -->
+              <div class="calc-summary-rows">
+                <div class="summary-line">
+                  <span class="line-label">총 담은 수량</span>
+                  <span class="line-val" id="total-qty-text">0개</span>
+                </div>
+                <div class="summary-line">
+                  <span class="line-label">정상 합계 금액</span>
+                  <span class="line-val strike" id="original-price-text">0원</span>
+                </div>
+                <div class="summary-line discount-highlight">
+                  <span class="line-label">20% 특별 할인액</span>
+                  <span class="line-val discount-val" id="discount-amount-text">-0원</span>
+                </div>
+              </div>
+
+              <div class="receipt-divider-solid"></div>
+
+              <!-- 최종 행사가격 및 1끼 환산가 -->
+              <div class="final-payment-box">
+                <div class="final-price-row">
+                  <span class="final-label">최종 결제 예상가</span>
+                  <span class="final-val" id="final-price-text">0원</span>
+                </div>
+                <div class="meal-price-badge" id="meal-price-badge">
+                  <span>1끼 환산 시: <strong id="per-meal-price-text">0원</strong> / 끼</span>
+                </div>
+              </div>
+
+              <!-- 피벗 핵심 메시지 배너 -->
+              <div class="combo-cheer-banner" id="combo-cheer-banner">
+                <span class="cheer-whale">🐳</span>
+                <span class="cheer-text" id="cheer-text">2개를 담으면 전 조합 9천원대로 할인됩니다!</span>
+              </div>
+
+              <!-- CTA 버튼 -->
+              <div class="receipt-cta-wrap">
+                <a href="#store-guide" class="btn btn-primary btn-block" id="btn-go-store">
+                  <span>센트럴점 매장에서 구매하기 🏬</span>
+                </a>
+              </div>
+
             </div>
-        </section>
+          </div>
 
-        <section class="glass-card rounded-2xl p-5 shadow-sm space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200/80 pb-3">
-                <div>
-                    <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
-                        <i data-lucide="table" class="w-5 h-5 text-indigo-600"></i>
-                        상세 판매 명세서
-                    </h3>
-                    <p class="text-xs text-slate-500 mt-0.5">선택한 필터 조건에 따른 개별 판매 내역</p>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span id="tableSummaryText" class="text-xs text-slate-500">총 0건 조회됨</span>
-                </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 3. 4대 라이프스타일 추천 큐레이션 섹션 -->
+    <section id="curation" class="curation-section">
+      <div class="section-container">
+        
+        <div class="section-title-wrap">
+          <span class="section-sub-title">CURATED COMBINATIONS</span>
+          <h2 class="section-main-title">고객 라이프스타일별 맞춤 4대 조합</h2>
+          <p class="section-desc">
+            어떤 조합을 고를지 고민되시나요? 사전 고객 설문 데이터를 바탕으로 탄생한 4가지 추천 조합을 만나보세요!
+          </p>
+        </div>
+
+        <div class="curation-grid">
+          
+          <!-- 세트 1: 영양균형형 -->
+          <div class="curation-card featured-curation" id="curation-balance">
+            <div class="curation-ribbon">인기 No.1</div>
+            <div class="curation-header">
+              <span class="curation-type">영양균형형</span>
+              <h3 class="curation-title">점심 든든 + 저녁 산뜻</h3>
             </div>
-
-            <!-- Table -->
-            <div class="overflow-x-auto rounded-xl border border-slate-200">
-                <table class="w-full text-left border-collapse text-sm">
-                    <thead>
-                        <tr class="bg-slate-100/80 text-slate-600 uppercase text-xs font-semibold tracking-wider border-b border-slate-200">
-                            <th class="py-3 px-4">일자</th>
-                            <th class="py-3 px-4">점포</th>
-                            <th class="py-3 px-4">카테고리</th>
-                            <th class="py-3 px-4">상품코드</th>
-                            <th class="py-3 px-4">상품명</th>
-                            <th class="py-3 px-4 text-right">정상단가</th>
-                            <th class="py-3 px-4 text-right">판매수량</th>
-                            <th class="py-3 px-4 text-right">할인액</th>
-                            <th class="py-3 px-4 text-right">매출액</th>
-                            <th class="py-3 px-4 text-center">행사</th>
-                        </tr>
-                    </thead>
-                    <tbody id="dataTableBody" class="divide-y divide-slate-200 bg-white">
-                        <!-- Dynamic Row Rendering -->
-                    </tbody>
-                </table>
+            <div class="curation-items-preview">
+              <div class="curation-item-chip">🥗 훈제오리 샐러드랩</div>
+              <span class="chip-plus">+</span>
+              <div class="curation-item-chip">🥩 소불고기덮밥</div>
             </div>
-
-            <!-- Pagination Controls -->
-            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
-                <div class="text-xs text-slate-500">
-                    페이지 <span id="currentPageText" class="font-semibold text-slate-700">1</span> / <span id="totalPagesText" class="font-semibold text-slate-700">1</span>
-                </div>
-                <div class="flex items-center space-x-2">
-                    <button id="prevPageBtn" class="px-3 py-1.5 text-xs font-medium bg-white border border-slate-300 text-slate-600 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition">
-                        이전
-                    </button>
-                    <button id="nextPageBtn" class="px-3 py-1.5 text-xs font-medium bg-white border border-slate-300 text-slate-600 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition">
-                        다음
-                    </button>
-                </div>
+            <p class="curation-desc">단백질과 채소의 황금 밸런스! 점심은 고기 밥으로 든든하게, 저녁은 산뜻한 샐러드랩으로 가볍게 챙기세요.</p>
+            <div class="curation-pricing">
+              <div class="pricing-original">정상가 12,100원</div>
+              <div class="pricing-final">
+                <span class="curation-dc-tag">20% DC</span>
+                <span class="curation-price">9,680원</span>
+              </div>
+              <div class="curation-per-meal">1끼당 <strong>4,840원</strong></div>
             </div>
-        </section>
+            <button class="btn btn-outline btn-curation-apply" data-preset="balance">이 조합 담기 ＋</button>
+          </div>
 
-    </main>
+          <!-- 세트 2: 가성비균형형 -->
+          <div class="curation-card" id="curation-value">
+            <div class="curation-header">
+              <span class="curation-type">가성비균형형</span>
+              <h3 class="curation-title">매콤 활력 + 가벼운 한 끼</h3>
+            </div>
+            <div class="curation-items-preview">
+              <div class="curation-item-chip">🥗 훈제오리 샐러드랩</div>
+              <span class="chip-plus">+</span>
+              <div class="curation-item-chip">🍗 닭갈비볶음밥</div>
+            </div>
+            <p class="curation-desc">매콤달콤한 닭갈비 볶음밥으로 기분 전환하고, 샐러드랩으로 칼로리 부담을 덜어내는 실속형 추천 구성.</p>
+            <div class="curation-pricing">
+              <div class="pricing-original">정상가 11,700원</div>
+              <div class="pricing-final">
+                <span class="curation-dc-tag">20% DC</span>
+                <span class="curation-price">9,360원</span>
+              </div>
+              <div class="curation-per-meal">1끼당 <strong>4,680원</strong></div>
+            </div>
+            <button class="btn btn-outline btn-curation-apply" data-preset="value">이 조합 담기 ＋</button>
+          </div>
 
-    <script>
-        // Sample Mock Data matching user CSV format with dates as `-YYYY-MM-DD`
-        const DEFAULT_MOCK_DATA = [
-            { "일자": "-2026-08-01", "점포": "센트럴점", "카테고리": "냉장 간편식", "상품코드": "RM-101", "상품명": "한끼 소불고기덮밥", "판매수량": 44, "정상단가": 5900, "할인액": 0, "매출액": 259600, "행사적용": "N" },
-            { "일자": "-2026-08-01", "점포": "센트럴점", "카테고리": "냉장 간편식", "상품코드": "RM-102", "상품명": "매콤 닭갈비볶음밥", "판매수량": 49, "정상단가": 5500, "할인액": 0, "매출액": 269500, "행사적용": "N" },
-            { "일자": "-2026-08-01", "점포": "센트럴점", "카테고리": "냉장 간편식", "상품코드": "RM-103", "상품명": "훈제오리 샐러드랩", "판매수량": 58, "정상단가": 6200, "할인액": 0, "매출액": 359600, "행사적용": "N" },
-            { "일자": "-2026-08-01", "점포": "강남점", "카테고리": "음료/디저트", "상품코드": "DR-201", "상품명": "아이스 아메리카노", "판매수량": 120, "정상단가": 3000, "할인액": 30000, "매출액": 330000, "행사적용": "Y" },
-            { "일자": "-2026-08-01", "점포": "강남점", "카테고리": "음료/디저트", "상품코드": "DR-202", "상품명": "생딸기 라떼", "판매수량": 35, "정상단가": 4500, "할인액": 0, "매출액": 157500, "행사적용": "N" },
-            { "일자": "-2026-08-02", "점포": "센트럴점", "카테고리": "냉장 간편식", "상품코드": "RM-101", "상품명": "한끼 소불고기덮밥", "판매수량": 52, "정상단가": 5900, "할인액": 31200, "매출액": 275600, "행사적용": "Y" },
-            { "일자": "-2026-08-02", "점포": "홍대점", "카테고리": "베이커리", "상품코드": "BK-301", "상품명": "크루아상 버터세트", "판매수량": 80, "정상단가": 3800, "할인액": 0, "매출액": 304000, "행사적용": "N" },
-            { "일자": "-2026-08-02", "점포": "강남점", "카테고리": "음료/디저트", "상품코드": "DR-201", "상품명": "아이스 아메리카노", "판매수량": 110, "정상단가": 3000, "할인액": 0, "매출액": 330000, "행사적용": "N" },
-            { "일자": "-2026-08-03", "점포": "홍대점", "카테고리": "베이커리", "상품코드": "BK-302", "상품명": "초코 소금빵", "판매수량": 65, "정상단가": 3200, "할인액": 6500, "매출액": 201500, "행사적용": "Y" },
-            { "일자": "-2026-08-03", "점포": "센트럴점", "카테고리": "냉장 간편식", "상품코드": "RM-104", "상품명": "우삼겹 된장찌개", "판매수량": 40, "정상단가": 6800, "할인액": 0, "매출액": 272000, "행사적용": "N" },
-            { "일자": "-2026-08-04", "점포": "강남점", "카테고리": "냉장 간편식", "상품코드": "RM-105", "상품명": "새우 로제파스타", "판매수량": 50, "정상단가": 7200, "할인액": 10000, "매출액": 350000, "행사적용": "Y" },
-            { "일자": "-2026-08-04", "점포": "홍대점", "카테고리": "음료/디저트", "상품코드": "DR-203", "상품명": "망고 스무디", "판매수량": 45, "정상단가": 5000, "할인액": 0, "매출액": 225000, "행사적용": "N" }
-        ];
+          <!-- 세트 3: 든든형 -->
+          <div class="curation-card" id="curation-hearty">
+            <div class="curation-header">
+              <span class="curation-type">든든형 (밥류 2개)</span>
+              <h3 class="curation-title">에너지 충전 더블 라이스</h3>
+            </div>
+            <div class="curation-items-preview">
+              <div class="curation-item-chip">🥩 소불고기덮밥</div>
+              <span class="chip-plus">+</span>
+              <div class="curation-item-chip">🍗 닭갈비볶음밥</div>
+            </div>
+            <p class="curation-desc">밥심이 필요한 날! 점심 덮밥, 저녁 볶음밥으로 하루 두 끼 탄수화물과 에너지를 든든하게 채우는 남성 고객 선호도 1위 조합.</p>
+            <div class="curation-pricing">
+              <div class="pricing-original">정상가 11,400원</div>
+              <div class="pricing-final">
+                <span class="curation-dc-tag">20% DC</span>
+                <span class="curation-price">9,120원</span>
+              </div>
+              <div class="curation-per-meal">1끼당 <strong>4,560원 (최저가!)</strong></div>
+            </div>
+            <button class="btn btn-outline btn-curation-apply" data-preset="hearty">이 조합 담기 ＋</button>
+          </div>
 
-        // Application State
-        let rawData = [...DEFAULT_MOCK_DATA];
-        let filteredData = [];
-        let currentPage = 1;
-        const pageSize = 10;
+          <!-- 세트 4: 가벼운형 -->
+          <div class="curation-card" id="curation-light">
+            <div class="curation-header">
+              <span class="curation-type">가벼운형 (랩 2개)</span>
+              <h3 class="curation-title">클린 식단 & 다이어트 케어</h3>
+            </div>
+            <div class="curation-items-preview">
+              <div class="curation-item-chip">🥗 훈제오리 샐러드랩</div>
+              <span class="chip-plus">+</span>
+              <div class="curation-item-chip">🥗 훈제오리 샐러드랩</div>
+            </div>
+            <p class="curation-desc">식단 관리가 필요한 다이어터와 직장인을 위한 클린 밀! 신선한 채소와 훈제오리로 부담 없는 하루를 완성합니다.</p>
+            <div class="curation-pricing">
+              <div class="pricing-original">정상가 12,400원</div>
+              <div class="pricing-final">
+                <span class="curation-dc-tag">20% DC</span>
+                <span class="curation-price">9,920원</span>
+              </div>
+              <div class="curation-per-meal">1끼당 <strong>4,960원 (최대할인)</strong></div>
+            </div>
+            <button class="btn btn-outline btn-curation-apply" data-preset="light">이 조합 담기 ＋</button>
+          </div>
 
-        // Chart instances
-        let trendChart = null;
-        let categoryChart = null;
+        </div>
 
-        // Initialize Icons & App
-        document.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
-            initCharts();
-            setupEventListeners();
-            loadData(rawData);
-        });
+      </div>
+    </section>
 
-        function initCharts() {
-            // Trend Line Chart
-            const ctxTrend = document.getElementById('trendChart').getContext('2d');
-            trendChart = new Chart(ctxTrend, {
-                type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: '매출액 (원)',
-                        data: [],
-                        borderColor: '#4f46e5',
-                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 4,
-                        pointHoverRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (context) => `매출액: ₩${context.parsed.y.toLocaleString()}`
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: (val) => '₩' + (val / 10000).toLocaleString() + '만'
-                            }
-                        }
-                    }
-                }
-            });
+    <!-- 4. 카드뉴스 및 기획 비하인드 스토리 섹션 -->
+    <section id="card-news" class="card-news-section">
+      <div class="section-container">
+        
+        <div class="section-title-wrap">
+          <span class="section-sub-title">STORY & INSIGHTS</span>
+          <h2 class="section-main-title">왜 바꿨을까? 고객 목소리에 집중했습니다!</h2>
+          <p class="section-desc">
+            공급자 중심의 강제 구성을 탈피하고, 1인 고객의 솔직한 피드백을 반영하여 탄생한 프로모션 비하인드 스토리 카드뉴스(총 6편)를 확인해 보세요.
+          </p>
+        </div>
 
-            // Category Doughnut Chart
-            const ctxCat = document.getElementById('categoryChart').getContext('2d');
-            categoryChart = new Chart(ctxCat, {
-                type: 'doughnut',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        data: [],
-                        backgroundColor: [
-                            '#6366f1', '#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'
-                        ],
-                        borderWidth: 2,
-                        borderColor: '#ffffff'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom' },
-                        tooltip: {
-                            callbacks: {
-                                label: (context) => `${context.label}: ₩${context.parsed.toLocaleString()}`
-                            }
-                        }
-                    }
-                }
-            });
-        }
+        <!-- 카드뉴스 캐러셀 슬라이더 컨테이너 -->
+        <div class="slider-wrapper">
+          
+          <button class="slider-nav-btn prev-btn" id="slider-prev-btn" aria-label="이전 카드보기">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
 
-        function loadData(data) {
-            // Normalize Date format to maintain "-YYYY-MM-DD"
-            rawData = data.map(item => {
-                let dateStr = String(item['일자'] || '').trim();
-                // Ensure leading dash if user uploaded plain YYYY-MM-DD
-                if (dateStr && !dateStr.startsWith('-') && /^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-                    dateStr = '-' + dateStr;
-                }
-                return {
-                    "일자": dateStr,
-                    "점포": String(item['점포'] || '미지정').trim(),
-                    "카테고리": String(item['카테고리'] || '기타').trim(),
-                    "상품코드": String(item['상품코드'] || '-').trim(),
-                    "상품명": String(item['상품명'] || '미지정').trim(),
-                    "판매수량": Number(item['판매수량'] || 0),
-                    "정상단가": Number(item['정상단가'] || 0),
-                    "할인액": Number(item['할인액'] || 0),
-                    "매출액": Number(item['매출액'] || 0),
-                    "행사적용": String(item['행사적용'] || 'N').trim().toUpperCase()
-                };
-            });
+          <div class="slider-track-viewport">
+            <div class="slider-track" id="slider-track">
+              
+              <!-- 카드 01 -->
+              <div class="slide-card" data-index="0">
+                <div class="slide-img-box" data-full-img="./1번.png">
+                  <img src="./1번.png" alt="01. 골라 담는 한 끼! 2개 사면 20% 할인 프로모션 소개" loading="lazy">
+                  <div class="zoom-indicator">🔍 클릭하여 확대</div>
+                </div>
+                <div class="slide-caption">
+                  <span class="slide-badge">01 / 06 티저</span>
+                  <h4>골라 담는 한 끼! 2개 사면 20% 할인!</h4>
+                  <p>이마트 센트럴점 단독 진행! 매일 점심 12:00 선착순 타임어택 오픈 안내</p>
+                </div>
+              </div>
 
-            populateFilterDropdowns();
-            applyFilters();
-        }
+              <!-- 카드 02 -->
+              <div class="slide-card" data-index="1">
+                <div class="slide-img-box" data-full-img="./2번.png">
+                  <img src="./2번.png" alt="02. 고객 설문조사 핵심 데이터 분석" loading="lazy">
+                  <div class="zoom-indicator">🔍 클릭하여 확대</div>
+                </div>
+                <div class="slide-caption">
+                  <span class="slide-badge">02 / 06 설문 결과</span>
+                  <h4>혼밥족 75%의 목소리에 집중했습니다</h4>
+                  <p>단독 식사 75%, 묶음 구매 의향 65%의 가설 검증과 고객 이탈 원인 분석</p>
+                </div>
+              </div>
 
-        function populateFilterDropdowns() {
-            const dates = [...new Set(rawData.map(d => d['일자']))].sort();
-            const stores = [...new Set(rawData.map(d => d['점포']))].sort();
-            const categories = [...new Set(rawData.map(d => d['카테고리']))].sort();
+              <!-- 카드 03 -->
+              <div class="slide-card" data-index="2">
+                <div class="slide-img-box" data-full-img="./3번.png">
+                  <img src="./3번.png" alt="03. 강제 묶음 탈피 솔루션" loading="lazy">
+                  <div class="zoom-indicator">🔍 클릭하여 확대</div>
+                </div>
+                <div class="slide-caption">
+                  <span class="slide-badge">03 / 06 피벗 솔루션</span>
+                  <h4>"강제 묶음은 이제 그만!" 자유 선택권 부여</h4>
+                  <p>샐러드랩 1 + 덮밥 1 고정 세트를 탈피하고 고객이 원하는 조합 2종을 직접 선택</p>
+                </div>
+              </div>
 
-            const dateSelect = document.getElementById('dateSelect');
-            const storeSelect = document.getElementById('storeSelect');
-            const categorySelect = document.getElementById('categorySelect');
+              <!-- 카드 04 -->
+              <div class="slide-card" data-index="3">
+                <div class="slide-img-box" data-full-img="./4번.png">
+                  <img src="./4번.png" alt="04. 취향대로 고르는 재미 든든하게 vs 가볍게" loading="lazy">
+                  <div class="zoom-indicator">🔍 클릭하여 확대</div>
+                </div>
+                <div class="slide-caption">
+                  <span class="slide-badge">04 / 06 취향 큐레이션</span>
+                  <h4>취향대로 고르는 재미! 든든하게 VS 가볍게</h4>
+                  <p>든든형(덮밥+볶음밥), 가벼운형(랩2개), 영양균형형(랩+밥) 1끼 4천원대 실현</p>
+                </div>
+              </div>
 
-            // Reset options
-            dateSelect.innerHTML = '<option value="ALL">전체 날짜</option>';
-            stores.length && (storeSelect.innerHTML = '<option value="ALL">전체 점포</option>');
-            categories.length && (categorySelect.innerHTML = '<option value="ALL">전체 카테고리</option>');
+              <!-- 카드 05 -->
+              <div class="slide-card" data-index="4">
+                <div class="slide-img-box" data-full-img="./5번.png">
+                  <img src="./5번.png" alt="05. 전 조합 9천원대 진입 할인 혜택" loading="lazy">
+                  <div class="zoom-indicator">🔍 클릭하여 확대</div>
+                </div>
+                <div class="slide-caption">
+                  <span class="slide-badge">05 / 06 혜택 구체화</span>
+                  <h4>2개 이상 20% 즉시 할인! 전 조합 9천원대</h4>
+                  <p>세트당 최대 2,480원 즉시 할인, 1만 원 이하로 즐기는 실속 있는 가성비</p>
+                </div>
+              </div>
 
-            dates.forEach(d => {
-                const opt = document.createElement('option');
-                opt.value = d;
-                opt.textContent = d; // Displays in -YYYY-MM-DD format
-                dateSelect.appendChild(opt);
-            });
+              <!-- 카드 06 -->
+              <div class="slide-card" data-index="5">
+                <div class="slide-img-box" data-full-img="./6번.png">
+                  <img src="./6번.png" alt="06. 매일 점심 12:00 선착순 타임어택 안내" loading="lazy">
+                  <div class="zoom-indicator">🔍 클릭하여 확대</div>
+                </div>
+                <div class="slide-caption">
+                  <span class="slide-badge">06 / 06 타임어택 안내</span>
+                  <h4>매일 점심 12:00 선착순 한정 타임어택!</h4>
+                  <p>오직 이마트 센트럴점 냉장 매대 골든존에서 만나는 서두르는 특별 혜택</p>
+                </div>
+              </div>
 
-            stores.forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s;
-                opt.textContent = s;
-                storeSelect.appendChild(opt);
-            });
+            </div>
+          </div>
 
-            categories.forEach(c => {
-                const opt = document.createElement('option');
-                opt.value = c;
-                opt.textContent = c;
-                categorySelect.appendChild(opt);
-            });
-        }
+          <button class="slider-nav-btn next-btn" id="slider-next-btn" aria-label="다음 카드보기">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
 
-        function applyFilters() {
-            const selectedDate = document.getElementById('dateSelect').value;
-            const selectedStore = document.getElementById('storeSelect').value;
-            const selectedCategory = document.getElementById('categorySelect').value;
-            const selectedPromo = document.getElementById('promoSelect').value;
-            const searchText = document.getElementById('searchInput').value.toLowerCase().trim();
+        </div>
 
-            filteredData = rawData.filter(item => {
-                const matchDate = selectedDate === 'ALL' || item['일자'] === selectedDate;
-                const matchStore = selectedStore === 'ALL' || item['점포'] === selectedStore;
-                const matchCat = selectedCategory === 'ALL' || item['카테고리'] === selectedCategory;
-                const matchPromo = selectedPromo === 'ALL' || item['행사적용'] === selectedPromo;
-                const matchSearch = !searchText || 
-                    item['상품명'].toLowerCase().includes(searchText) || 
-                    item['상품코드'].toLowerCase().includes(searchText);
+        <!-- 슬라이더 도트 인디케이터 -->
+        <div class="slider-dots" id="slider-dots">
+          <span class="dot active" data-index="0"></span>
+          <span class="dot" data-index="1"></span>
+          <span class="dot" data-index="2"></span>
+          <span class="dot" data-index="3"></span>
+          <span class="dot" data-index="4"></span>
+          <span class="dot" data-index="5"></span>
+        </div>
 
-                return matchDate && matchStore && matchCat && matchPromo && matchSearch;
-            });
+      </div>
+    </section>
 
-            currentPage = 1;
-            updateDashboard();
-        }
+    <!-- 5. 오프라인 매장 안내 & 골든존 진열 가이드 섹션 -->
+    <section id="store-guide" class="store-guide-section">
+      <div class="section-container">
+        
+        <div class="section-title-wrap">
+          <span class="section-sub-title">OFFLINE STORE GUIDE</span>
+          <h2 class="section-main-title">이마트 센트럴점 찾아오시는 길 & 매대 안내</h2>
+          <p class="section-desc">
+            본 프로모션은 <strong>이마트 센트럴점 단독</strong>으로 진행됩니다. 냉장 매대 골든존에서 스윙어와 아크릴 네임택을 확인하세요!
+          </p>
+        </div>
 
-        function updateDashboard() {
-            // Update Summary Badges
-            document.getElementById('dataCountBadge').textContent = `총 ${filteredData.length.toLocaleString()}건 데이터`;
+        <div class="store-guide-grid">
+          
+          <!-- 좌측: 매장 기본 정보 -->
+          <div class="store-info-box">
+            <div class="store-header-chip">
+              <span class="chip-status">단독 진행 매장</span>
+              <h3>이마트 센트럴점</h3>
+            </div>
+            
+            <ul class="store-info-list">
+              <li>
+                <span class="info-icon">📍</span>
+                <div class="info-text">
+                  <strong>행사 장소</strong>
+                  <span>지하 1층 신선·간편식 코너 <strong>「냉장 간편식 골든존」</strong></span>
+                </div>
+              </li>
+              <li>
+                <span class="info-icon">🗓️</span>
+                <div class="info-text">
+                  <strong>행사 기간</strong>
+                  <span>2026.10.21(수) ~ 11.03(화) (총 14일간)</span>
+                </div>
+              </li>
+              <li>
+                <span class="info-icon">⏰</span>
+                <div class="info-text">
+                  <strong>영업 시간</strong>
+                  <span>오전 10:00 ~ 오후 23:00 (타임어택 매일 12:00 개시)</span>
+                </div>
+              </li>
+              <li>
+                <span class="info-icon">🏷️</span>
+                <div class="info-text">
+                  <strong>결제 방식</strong>
+                  <span>매장 계산대/셀프 계산대에서 2개 스캔 시 POS 20% 자동 할인 적용</span>
+                </div>
+              </li>
+            </ul>
 
-            // Calculate Metrics
-            let totalRevenue = 0;
-            let totalQuantity = 0;
-            let totalDiscount = 0;
+            <div class="store-actions-row">
+              <button class="btn btn-outline" id="btn-copy-address">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <span>매장 주소 복사</span>
+              </button>
+              <button class="btn btn-primary" id="btn-open-map-notice">
+                <span>지도 앱에서 길찾기 🗺️</span>
+              </button>
+            </div>
+          </div>
 
-            filteredData.forEach(d => {
-                totalRevenue += d['매출액'];
-                totalQuantity += d['판매수량'];
-                totalDiscount += d['할인액'];
-            });
+          <!-- 우측: 골든존 진열 시각 가이드 & 마스코트 고래잇 팁 -->
+          <div class="golden-zone-visual-box">
+            <div class="golden-zone-card">
+              <div class="gz-badge">매대 찾는 꿀팁!</div>
+              <h4>냉장 쇼케이스 상단 2~3단을 주목하세요!</h4>
+              <p>설문조사 인지율 85%의 골든존에 3종 상품이 나란히 인접 진열되어 있습니다.</p>
+              
+              <div class="mock-shelf-display">
+                <div class="shelf-tier disabled">상단 1단 (일반 냉장 음료)</div>
+                <div class="shelf-tier golden-highlight">
+                  <span class="tier-tag">★ 골든존 (상단 2~3단) 20% 할인 코너 ★</span>
+                  <div class="shelf-products">
+                    <span class="item-tag-shelf">🥗 샐러드랩 (6,200원)</span>
+                    <span class="item-tag-shelf">🥩 불고기덮밥 (5,900원)</span>
+                    <span class="item-tag-shelf">🍗 닭갈비볶음밥 (5,500원)</span>
+                  </div>
+                  <div class="shelf-swinger">
+                    <span>✨ [20% 특가 스윙어 부착 위치]</span>
+                  </div>
+                </div>
+                <div class="shelf-tier disabled">하단 4단 (대용량 간편식)</div>
+              </div>
 
-            const avgPrice = totalQuantity > 0 ? Math.round(totalRevenue / totalQuantity) : 0;
+              <div class="mascot-tip-banner">
+                <span class="mascot-whale-icon">🐳</span>
+                <p><strong>고래잇 꿀팁:</strong> "매대 앞 형광 아크릴 네임택을 확인하시면 원하는 상품을 1초 만에 쏙쏙 골라 담을 수 있어요!"</p>
+              </div>
 
-            // Render Metrics
-            document.getElementById('statTotalRevenue').textContent = `₩${totalRevenue.toLocaleString()}`;
-            document.getElementById('statTotalQuantity').textContent = `${totalQuantity.toLocaleString()}개`;
-            document.getElementById('statTotalDiscount').textContent = `₩${totalDiscount.toLocaleString()}`;
-            document.getElementById('statAvgPrice').textContent = `₩${avgPrice.toLocaleString()}`;
+            </div>
+          </div>
 
-            // Render Charts
-            updateCharts();
+        </div>
 
-            // Render Table
-            renderTable();
-        }
+      </div>
+    </section>
 
-        function updateCharts() {
-            // 1. Sales Trend by Date
-            const trendMap = {};
-            filteredData.forEach(d => {
-                trendMap[d['일자']] = (trendMap[d['일자']] || 0) + d['매출액'];
-            });
+    <!-- 6. 프로모션 FAQ 및 주의사항 섹션 -->
+    <section id="faq" class="faq-section">
+      <div class="section-container">
+        
+        <div class="section-title-wrap">
+          <span class="section-sub-title">FAQ & NOTICE</span>
+          <h2 class="section-main-title">자주 묻는 질문 & 이용 유의사항</h2>
+          <p class="section-desc">궁금하신 점을 빠르게 확인해 드립니다.</p>
+        </div>
 
-            const sortedDates = Object.keys(trendMap).sort();
-            const trendValues = sortedDates.map(date => trendMap[date]);
+        <div class="faq-accordion-list" id="faq-accordion">
+          
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span class="q-badge">Q</span>
+              <span class="q-title">행사 대상 매장이 어디인가요? 다른 점포에서도 진행하나요?</span>
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-answer">
+              <p>본 프로모션은 <strong>이마트 센트럴점 1개 점포 단독</strong>으로 진행되는 파일럿 행사입니다. 타 점포(리버점, 파크점 등)에서는 진행되지 않으니 매장 방문 전 꼭 센트럴점 여부를 확인해 주시기 바랍니다.</p>
+            </div>
+          </div>
 
-            trendChart.data.labels = sortedDates;
-            trendChart.data.datasets[0].data = trendValues;
-            trendChart.update();
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span class="q-badge">Q</span>
+              <span class="q-title">동일한 상품 2개를 구매해도 20% 할인이 적용되나요?</span>
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-answer">
+              <p><strong>네, 가능합니다!</strong> 훈제오리 샐러드랩 2개, 소불고기덮밥 2개 등 동일한 상품을 중복으로 2개 선택하셔도 합계 금액의 20% 즉시 할인이 동일하게 적용됩니다.</p>
+            </div>
+          </div>
 
-            // 2. Sales Share by Category
-            const catMap = {};
-            filteredData.forEach(d => {
-                catMap[d['카테고리']] = (catMap[d['카테고리']] || 0) + d['매출액'];
-            });
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span class="q-badge">Q</span>
+              <span class="q-title">3개 이상 구매할 때도 할인이 적용되나요?</span>
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-answer">
+              <p>네! 대상 상품 3종 중에서 <strong>2개 이상 구매 시</strong> 선택하신 대상 품목 전체 합계 금액에 대해 20% 즉시 할인이 적용됩니다.</p>
+            </div>
+          </div>
 
-            const catLabels = Object.keys(catMap);
-            const catValues = catLabels.map(cat => catMap[cat]);
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span class="q-badge">Q</span>
+              <span class="q-title">통신사 제휴 할인이나 쿠폰과 중복 적용이 되나요?</span>
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-answer">
+              <p>본 행사는 20% 파격 할인이 즉시 반영되는 특가 프로모션으로, 타 제휴 카드 할인 및 추가 할인 쿠폰과의 <strong>중복 적용은 불가</strong>합니다. (신세계포인트 적립은 정상 가능)</p>
+            </div>
+          </div>
 
-            categoryChart.data.labels = catLabels;
-            categoryChart.data.datasets[0].data = catValues;
-            categoryChart.update();
-        }
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span class="q-badge">Q</span>
+              <span class="q-title">매일 점심 12:00 타임어택 수량은 몇 개인가요?</span>
+              <span class="faq-arrow">▼</span>
+            </button>
+            <div class="faq-answer">
+              <p>매일 점심 12:00 정각부터 선착순 한정 수량(당일 20세트 내외)으로 진행되며, 조기 완판 시 당일 행사가 마감될 수 있습니다. 인기 조합을 원하시면 12:00 전후 매장 방문을 권장해 드립니다.</p>
+            </div>
+          </div>
 
-        function renderTable() {
-            const tbody = document.getElementById('dataTableBody');
-            tbody.innerHTML = '';
+        </div>
 
-            const totalPages = Math.ceil(filteredData.length / pageSize) || 1;
-            document.getElementById('currentPageText').textContent = currentPage;
-            document.getElementById('totalPagesText').textContent = totalPages;
-            document.getElementById('tableSummaryText').textContent = `총 ${filteredData.length.toLocaleString()}건 중 ${Math.min((currentPage - 1) * pageSize + 1, filteredData.length)}-${Math.min(currentPage * pageSize, filteredData.length)}건 표시`;
+      </div>
+    </section>
 
-            document.getElementById('prevPageBtn').disabled = currentPage === 1;
-            document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
+  </main>
 
-            const startIdx = (currentPage - 1) * pageSize;
-            const pageData = filteredData.slice(startIdx, startIdx + pageSize);
+  <!-- 하단 푸터 -->
+  <footer class="site-footer">
+    <div class="section-container footer-content">
+      <div class="footer-brand">
+        <div class="footer-logo">emart 센트럴점</div>
+        <p>「내 맘대로 골라 담는 한 끼, 2개 사면 파격 20% 할인!」</p>
+        <span class="footer-doc-info">문서번호: PLAN-20261014-FINAL · 데이터 리터러시 프로모션팀</span>
+      </div>
+      <div class="footer-bottom-info">
+        <p>© 2026 이마트 센트럴점 냉장 간편식 프로모션. All rights reserved.</p>
+        <p class="footer-disclaimer">본 페이지는 이마트 센트럴점 파일럿 프로모션 안내를 위해 제작된 마이크로사이트입니다.</p>
+      </div>
+    </div>
+  </footer>
 
-            if (pageData.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="10" class="py-8 text-center text-slate-400">
-                            조회된 데이터가 없습니다.
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
+  <!-- 모바일 하단 고정 스티키 액션 바 -->
+  <aside id="sticky-bottom-bar" class="sticky-bottom-bar">
+    <div class="sticky-inner">
+      <div class="sticky-cart-info" id="sticky-cart-info">
+        <span class="sticky-label">담긴 상품: <strong id="sticky-qty">0개</strong></span>
+        <span class="sticky-price" id="sticky-price">0원 (0% DC)</span>
+      </div>
+      <div class="sticky-actions">
+        <button id="btn-sticky-share" class="btn-sticky-icon" aria-label="친구에게 공유하기" title="공유하기">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="18" cy="5" r="3"></circle>
+            <circle cx="6" cy="12" r="3"></circle>
+            <circle cx="18" cy="19" r="3"></circle>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+          </svg>
+        </button>
+        <a href="#calculator" class="btn-sticky-cta" id="btn-sticky-calc">
+          조합 확인 / 담기 🛒
+        </a>
+      </div>
+    </div>
+  </aside>
 
-            pageData.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-50/80 transition text-slate-700";
+  <!-- 이미지 확대 모달 (Lightbox) -->
+  <div id="image-modal" class="image-modal" aria-hidden="true">
+    <div class="modal-backdrop" id="modal-backdrop"></div>
+    <div class="modal-container">
+      <button class="modal-close-btn" id="btn-modal-close" aria-label="닫기">✕</button>
+      <div class="modal-image-wrapper">
+        <img id="modal-img" src="" alt="확대 이미지">
+      </div>
+      <div class="modal-caption" id="modal-caption"></div>
+    </div>
+  </div>
 
-                const isPromo = item['행사적용'] === 'Y';
-                const promoBadge = isPromo
-                    ? `<span class="px-2 py-0.5 text-xs font-semibold bg-rose-100 text-rose-700 rounded-full">행사</span>`
-                    : `<span class="px-2 py-0.5 text-xs font-medium bg-slate-100 text-slate-600 rounded-full">정상</span>`;
+  <!-- 토스트 알림 메시지 -->
+  <div id="toast-message" class="toast-message" role="alert" aria-live="polite"></div>
 
-                tr.innerHTML = `
-                    <td class="py-3 px-4 font-mono text-xs font-medium text-indigo-900">${item['일자']}</td>
-                    <td class="py-3 px-4">${item['점포']}</td>
-                    <td class="py-3 px-4">${item['카테고리']}</td>
-                    <td class="py-3 px-4 font-mono text-xs text-slate-500">${item['상품코드']}</td>
-                    <td class="py-3 px-4 font-medium text-slate-900">${item['상품명']}</td>
-                    <td class="py-3 px-4 text-right">₩${item['정상단가'].toLocaleString()}</td>
-                    <td class="py-3 px-4 text-right font-medium">${item['판매수량'].toLocaleString()}</td>
-                    <td class="py-3 px-4 text-right text-rose-600">${item['할인액'] > 0 ? '-₩' + item['할인액'].toLocaleString() : '0'}</td>
-                    <td class="py-3 px-4 text-right font-bold text-slate-900">₩${item['매출액'].toLocaleString()}</td>
-                    <td class="py-3 px-4 text-center">${promoBadge}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function setupEventListeners() {
-            // Filters change
-            document.getElementById('dateSelect').addEventListener('change', applyFilters);
-            document.getElementById('storeSelect').addEventListener('change', applyFilters);
-            document.getElementById('categorySelect').addEventListener('change', applyFilters);
-            document.getElementById('promoSelect').addEventListener('change', applyFilters);
-            document.getElementById('searchInput').addEventListener('input', applyFilters);
-
-            // Pagination
-            document.getElementById('prevPageBtn').addEventListener('click', () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    renderTable();
-                }
-            });
-
-            document.getElementById('nextPageBtn').addEventListener('click', () => {
-                const totalPages = Math.ceil(filteredData.length / pageSize);
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    renderTable();
-                }
-            });
-
-            // CSV Upload Listener
-            document.getElementById('csvFileInput').addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-
-                Papa.parse(file, {
-                    header: true,
-                    skipEmptyLines: true,
-                    complete: (results) => {
-                        if (results.data && results.data.length > 0) {
-                            loadData(results.data);
-                        } else {
-                            alert('CSV 파일에 유효한 데이터가 없습니다.');
-                        }
-                    },
-                    error: (err) => {
-                        console.error("CSV Parse Error:", err);
-                        alert('CSV 파일을 파싱하는데 실패했습니다.');
-                    }
-                });
-            });
-
-            // Reset Demo Data
-            document.getElementById('resetDemoBtn').addEventListener('click', () => {
-                document.getElementById('csvFileInput').value = '';
-                loadData(DEFAULT_MOCK_DATA);
-            });
-        }
-    </script>
+  <!-- 스크립트 연결 -->
+  <script src="./app.js"></script>
 </body>
 </html>
